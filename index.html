@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>你的内心住着什么怪物</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card: #1a1a1a;
+      --card2: #222;
+      --red: #c0392b;
+      --red2: #e74c3c;
+      --text: #e0e0e0;
+      --dim: #666;
+      --gold: #d4af37;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    #app {
+      min-height: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 24px 20px;
+    }
+    .hidden { display: none !important; }
+
+    /* 首页 */
+    .home-screen {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 90vh; text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .home-screen::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(ellipse at center, rgba(192,57,43,0.08) 0%, transparent 60%);
+      animation: pulseBg 4s ease-in-out infinite;
+    }
+    @keyframes pulseBg {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+    .home-title {
+      font-size: 56px; font-weight: 900;
+      background: linear-gradient(135deg, #c0392b, #e74c3c, #c0392b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 2px;
+      position: relative;
+      text-shadow: 0 0 40px rgba(192,57,43,0.3);
+    }
+    .home-subtitle { font-size: 18px; color: var(--dim); margin-top: 12px; position: relative; }
+    .home-divider {
+      width: 80px; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--red), transparent);
+      margin: 20px auto 30px;
+    }
+    .home-card {
+      background: var(--card);
+      border: 1px solid rgba(192,57,43,0.2);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 32px;
+      position: relative;
+      box-shadow: 0 0 30px rgba(192,57,43,0.05);
+    }
+    .home-card p { font-size: 15px; color: var(--dim); line-height: 1.8; }
+    .home-card .highlight { color: var(--red2); font-weight: 600; }
+
+    .btn-primary {
+      display: block; width: 100%; max-width: 280px;
+      padding: 16px 24px; border-radius: 12px; border: none;
+      background: linear-gradient(135deg, #c0392b, #e74c3c);
+      color: #fff; font-size: 18px; font-weight: 700;
+      text-align: center; cursor: pointer;
+      box-shadow: 0 8px 32px rgba(192,57,43,0.35);
+      transition: all .15s ease;
+      position: relative;
+    }
+    .btn-primary:active { transform: translateY(1px); box-shadow: 0 4px 16px rgba(192,57,43,0.25); }
+
+    /* 答题页 */
+    .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .quiz-header span { font-size: 13px; color: var(--dim); }
+    .quiz-header .num { color: var(--red2); font-weight: 700; }
+    .progress-wrap { height: 4px; border-radius: 2px; overflow: hidden; background: rgba(255,255,255,0.08); margin-bottom: 28px; }
+    .progress-bar { height: 100%; background: linear-gradient(90deg, var(--red), var(--red2)); border-radius: 2px; transition: width .35s ease; }
+    .question-tag {
+      display: inline-block; padding: 4px 12px; border-radius: 4px;
+      background: rgba(192,57,43,0.12); color: var(--red2);
+      font-size: 12px; font-weight: 600; margin-bottom: 14px;
+      border: 1px solid rgba(192,57,43,0.15);
+    }
+    .question-title { font-size: 20px; font-weight: 700; line-height: 1.6; margin-bottom: 24px; }
+    .option-list { display: flex; flex-direction: column; gap: 10px; }
+    .option-btn {
+      text-align: left; padding: 14px 16px; border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: var(--card);
+      cursor: pointer; font-size: 15px; color: var(--text);
+      transition: all .15s ease;
+    }
+    .option-btn:active {
+      transform: scale(.985);
+      border-color: rgba(192,57,43,0.4);
+      background: #1a0a0a;
+    }
+    .option-label {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 26px; height: 26px; border-radius: 50%;
+      background: rgba(255,255,255,0.06); font-size: 12px; font-weight: 700;
+      color: var(--dim); margin-right: 10px;
+    }
+
+    /* 结果页 */
+    .result-screen { text-align: center; }
+    .result-rarity {
+      display: inline-block; padding: 6px 16px; border-radius: 4px;
+      font-size: 12px; font-weight: 700; letter-spacing: 2px;
+      margin-bottom: 16px;
+      animation: flicker 2s infinite;
+    }
+    @keyframes flicker {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    .result-monster {
+      width: 160px; height: 160px; margin: 0 auto 16px;
+      border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 80px;
+      position: relative;
+    }
+    .result-monster::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 22px;
+      border: 1px solid rgba(192,57,43,0.2);
+    }
+    .result-name { font-size: 28px; font-weight: 800; margin-bottom: 4px; }
+    .result-divider { width: 48px; height: 2px; background: var(--red); border-radius: 1px; margin: 12px auto 20px; }
+    .result-card {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 16px; padding: 20px;
+      margin-bottom: 16px; text-align: left;
+    }
+    .result-desc { font-size: 14px; color: rgba(255,255,255,0.75); line-height: 1.8; }
+    .result-tagline {
+      background: rgba(192,57,43,0.08);
+      border-left: 3px solid var(--red);
+      padding: 12px 14px; border-radius: 0 8px 8px 0;
+      font-size: 14px; color: var(--red2); font-weight: 500;
+      margin-top: 12px;
+    }
+    .result-traits { margin-top: 16px; }
+    .trait-tag {
+      display: inline-block; padding: 4px 12px; border-radius: 4px;
+      background: rgba(255,255,255,0.04); color: var(--dim);
+      font-size: 12px; margin: 3px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .btn-restart {
+      display: block; width: 100%;
+      padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
+      background: transparent; color: var(--text);
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      margin-top: 8px; transition: all .15s ease;
+    }
+    .btn-restart:active { background: var(--card); }
+
+    /* 底部 */
+    .footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.04); font-size: 11px; color: rgba(255,255,255,0.2); text-align: center; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+<script>
+// ==================== 题库 ====================
+const questions = [
+  {
+    id: 1,
+    title: "走路时有人不小心撞了你一下，没道歉就走了，你第一反应是？",
+    options: [
+      { label: "A", text: "算了，谁都有不小心的时候", scores: { 冷漠: 0, 暴怒: 0, 偏执: 0, 病娇: 0, 傲慢: 0, 贪婪: 0, 嫉妒: 0, 腹黑: 0 } },
+      { label: "B", text: "火气瞬间上来了，想骂回去", scores: { 冷酷: 1, 暴怒: 3, 偏执: 1, 冷漠: 0, 病娇: 0, 傲慢: 1, 嫉妒: 0, 腹黑: 1 } },
+      { label: "C", text: "记下他长什么样，下次碰到再说", scores: { 偏执: 3, 腹黑: 2, 暴怒: 1 } },
+      { label: "D", text: "当场瞪回去，用气场压住他", scores: { 傲慢: 2, 冷漠: 2, 暴怒: 1 } },
+    ],
+  },
+  {
+    id: 2,
+    title: "朋友突然告诉你他升职加薪了，工资比你高不少。你心里真实的想法是？",
+    options: [
+      { label: "A", text: "替他高兴，他值得", scores: {} },
+      { label: "B", text: "有点酸，但不会表现出来", scores: { 嫉妒: 2, 腹黑: 1 } },
+      { label: "C", text: "凭什么是他？我哪点比他差？", scores: { 嫉妒: 3, 傲慢: 2, 暴怒: 1 } },
+      { label: "D", text: "他是不是走了什么后门？", scores: { 嫉妒: 2, 偏执: 2, 腹黑: 1 } },
+    ],
+  },
+  {
+    id: 3,
+    title: "你养了一只宠物，但它某天突然不见了。你最担心的是？",
+    options: [
+      { label: "A", text: "它是不是出意外了……好难过", scores: {} },
+      { label: "B", text: "要是让我知道是谁干的，他死定了", scores: { 暴怒: 2, 偏执: 2, 腹黑: 1 } },
+      { label: "C", text: "它是不是不要我了……", scores: { 病娇: 3, 偏执: 1 } },
+      { label: "D", text: "算了，再买一只", scores: { 冷漠: 3, 傲慢: 1 } },
+    ],
+  },
+  {
+    id: 4,
+    title: "深夜刷手机，看到前任发了和新欢的合照，看起来很甜。你第一反应？",
+    options: [
+      { label: "A", text: "划过，与我无关", scores: { 冷漠: 2 } },
+      { label: "B", text: "这新欢看着也不怎么样嘛", scores: { 嫉妒: 2, 傲慢: 2, 腹黑: 1 } },
+      { label: "C", text: "心里堵得慌，睡不着了", scores: { 偏执: 2, 病娇: 2 } },
+      { label: "D", text: "截图发闺蜜：你看这俩人能撑多久", scores: { 腹黑: 3, 嫉妒: 1 } },
+    ],
+  },
+  {
+    id: 5,
+    title: "你在排队，有人明目张胆地插队到你前面。你会？",
+    options: [
+      { label: "A", text: "出声制止，让他后面排队去", scores: { 暴怒: 1, 傲慢: 1 } },
+      { label: "B", text: "心里骂了一万句，但嘴上什么都没说", scores: { 偏执: 1, 腹黑: 2 } },
+      { label: "C", text: "冷笑一声，等他结账时'不小心'碰掉他的东西", scores: { 腹黑: 3, 冷漠: 1 } },
+      { label: "D", text: "无所谓，又不赶时间", scores: {} },
+    ],
+  },
+  {
+    id: 6,
+    title: "如果你有一面魔镜，可以告诉你任何人的真实想法，你最想知道谁的？",
+    options: [
+      { label: "A", text: "我最在乎的人是不是真心对我", scores: { 病娇: 3, 偏执: 1 } },
+      { label: "B", text: "那些表面对我好的人背后怎么说我", scores: { 腹黑: 2, 偏执: 2 } },
+      { label: "C", text: "竞争对手到底有什么底牌", scores: { 贪婪: 2, 傲慢: 1, 腹黑: 1 } },
+      { label: "D", text: "不想知道，有些事不知道更好", scores: { 冷漠: 2 } },
+    ],
+  },
+  {
+    id: 7,
+    title: "你走夜路，发现有人一直跟在你后面。你的第一反应是？",
+    options: [
+      { label: "A", text: "加快脚步，紧张地偷偷回头看", scores: { 偏执: 1 } },
+      { label: "B", text: "停下来，转身盯着他看", scores: { 傲慢: 2, 暴怒: 1 } },
+      { label: "C", text: "脑子里已经想好了怎么反击", scores: { 腹黑: 2, 冷漠: 1 } },
+      { label: "D", text: "根本没注意到，在想别的事", scores: { 冷漠: 2 } },
+    ],
+  },
+  {
+    id: 8,
+    title: "如果有一天你可以做一件绝对不被发现的事，你会选什么？",
+    options: [
+      { label: "A", text: "悄悄给讨厌的人的使点绊子", scores: { 腹黑: 3, 暴怒: 1 } },
+      { label: "B", text: "把喜欢的人锁在家里，只属于我", scores: { 病娇: 3, 偏执: 1 } },
+      { label: "C", text: "把银行金库搬空", scores: { 贪婪: 3, 傲慢: 1 } },
+      { label: "D", text: "没什么想做的，现在挺好的", scores: {} },
+    ],
+  },
+  {
+    id: 9,
+    title: "你的伴侣忘记了你们的纪念日。你内心真实的OS是？",
+    options: [
+      { label: "A", text: "有点失落，但直接说出来就好了", scores: {} },
+      { label: "B", text: "他是不是不在乎我了？", scores: { 病娇: 2, 偏执: 2 } },
+      { label: "C", text: "记下来，下次他生日我也不过了", scores: { 腹黑: 2, 偏执: 1 } },
+      { label: "D", text: "无所谓，我自己也不记得", scores: { 冷漠: 2 } },
+    ],
+  },
+  {
+    id: 10,
+    title: "以下哪种场景最能让你感到愉悦？",
+    options: [
+      { label: "A", text: "看到讨厌的人吃瘪", scores: { 腹黑: 2, 嫉妒: 1 } },
+      { label: "B", text: "一个人在家安静地待着，谁也别烦我", scores: { 冷漠: 2 } },
+      { label: "C", text: "被很多人关注和赞美", scores: { 傲慢: 3 } },
+      { label: "D", text: "没什么特别能让我开心的事了", scores: { 偏执: 2, 冷漠: 1 } },
+    ],
+  },
+  {
+    id: 11,
+    title: "你发现好朋友瞒着你和其他朋友出去玩了，没叫你。你会？",
+    options: [
+      { label: "A", text: "下次直接问他怎么回事", scores: {} },
+      { label: "B", text: "心里很不爽，但装作没事", scores: { 嫉妒: 2, 腹黑: 1 } },
+      { label: "C", text: "OK，这段关系到此为止了", scores: { 冷漠: 2, 偏执: 1 } },
+      { label: "D", text: "我也会让他尝尝被冷落的滋味", scores: { 腹黑: 2, 病娇: 1 } },
+    ],
+  },
+  {
+    id: 12,
+    title: "你最好的朋友在公开场合让你出了丑。你的第一反应是？",
+    options: [
+      { label: "A", text: "当场翻脸，让他下不来台", scores: { 暴怒: 2, 傲慢: 1 } },
+      { label: "B", text: "笑着打圆场，但心里已经拉黑了", scores: { 腹黑: 3, 偏执: 1 } },
+      { label: "C", text: "尴尬但原谅他，他不是故意的", scores: {} },
+      { label: "D", text: "无所谓，反正我也没有什么朋友", scores: { 冷漠: 2, 偏执: 1 } },
+    ],
+  },
+  {
+    id: 13,
+    title: "你有了一个挣快钱的机会，但需要踩线。你会？",
+    options: [
+      { label: "A", text: "绝不碰，原则问题", scores: {} },
+      { label: "B", text: "看风险大小，风险低就干", scores: { 贪婪: 2, 傲慢: 1 } },
+      { label: "C", text: "哪有钱往哪走，管他呢", scores: { 贪婪: 3, 冷漠: 1 } },
+      { label: "D", text: "先干再说，被发现再说", scores: { 贪婪: 2, 腹黑: 2 } },
+    ],
+  },
+  {
+    id: 14,
+    title: "你觉得自己内心深处最真实的底色是？",
+    options: [
+      { label: "A", text: "一团乱麻，我自己都看不清", scores: { 偏执: 1, 病娇: 1 } },
+      { label: "B", text: "一潭死水，没什么波澜", scores: { 冷漠: 3 } },
+      { label: "C", text: "一团火，随时可能烧起来", scores: { 暴怒: 2, 傲慢: 1 } },
+      { label: "D", text: "一张网，等着猎物自己撞上来", scores: { 腹黑: 3, 贪婪: 1 } },
+    ],
+  },
+];
+
+// ==================== 怪物人格库 ====================
+const personalities = [
+  {
+    id: "spider",
+    name: "🕷️ 腹黑蜘蛛",
+    tagline: '"你永远不知道我什么时候在织网。"',
+    dimensions: ["腹黑", "偏执"],
+    description: "你的内心住着一只腹黑蜘蛛。你擅长等待、观察、布局。表面上风平浪静，实际上每一步都在你的算计之中。你知道什么时候该笑，什么时候该沉默，什么时候该把一个人从你的世界里悄无声息地抹去。你从不冲动复仇——你织网，然后等猎物自己走进来。",
+    traits: ["高段位玩家", "表面温和", "记仇但不声张", "精于算计"],
+    color: "#8e44ad",
+    emoji: "🕷️"
+  },
+  {
+    id: "wolf",
+    name: "🐺 暴怒狼人",
+    tagline: '"你以为我在生气？不，我一直在生气。"',
+    dimensions: ["暴怒", "偏执"],
+    description: "你的内心深处住着一头随时可能失控的狼人。你有着极低的忍耐阈值和极高的爆发力。平时你还能压住，但要是有不长眼的人踩到你的线——砰。你发起火来连自己都控制不住，事后可能会后悔，但那个瞬间，你只想毁灭。",
+    traits: ["易燃易爆", "易怒但来得快去得也快", "冲动型选手", "压迫感强"],
+    color: "#c0392b",
+    emoji: "🐺"
+  },
+  {
+    id: "serpent",
+    name: "🐍 贪婪巨蟒",
+    tagline: '"永远不满足，永远想要更多。"',
+    dimensions: ["贪婪", "傲慢"],
+    description: "你的内心住着一条永远也喂不饱的巨蟒。什么都想要——钱、爱、认可、权力——而且多少都不够。你信奉弱肉强食，看不起那些安于现状的人。你不断地吞，不断地要，但每次得到之后，空虚感来得比满足还快。",
+    traits: ["永不满足", "精打细算", "物欲强", "看不起弱者"],
+    color: "#27ae60",
+    emoji: "🐍"
+  },
+  {
+    id: "ghost",
+    name: "👻 嫉妒怨灵",
+    tagline: '"凭什么他有，我没有？"',
+    dimensions: ["嫉妒", "偏执"],
+    description: "你的内心住着一个永远在嫉妒的怨灵。你总是忍不住拿自己和别人比较，而且每次都比输了。看到别人过得好，你心里像有虫子在爬。你不会搞破坏，但会默默地在心里诅咒，默默地问命运：凭什么？日积月累，你的心已经酸到发苦。",
+    traits: ["习惯性比较", "容易酸", "不甘心但不动手", "自我折磨型"],
+    color: "#2c3e50",
+    emoji: "👻"
+  },
+  {
+    id: "peacock",
+    name: "🦚 傲慢孔雀",
+    tagline: '"好看的皮囊千篇一律，但我是最好看的那一个。"',
+    dimensions: ["傲慢", "冷漠"],
+    description: "你的内心住着一只不可一世的孔雀。你享受被注视、被认可、被仰视的感觉。你对自己的品味/能力/外表有着绝对的自信——甚至有点过于自信了。你看不上大多数人和事，觉得他们配不上你。但你内心深处害怕一件事：有一天没有人再看着你。",
+    traits: ["自恋", "在意形象", "嘴上不在乎别人", "怕被忽视"],
+    color: "#f39c12",
+    emoji: "🦚"
+  },
+  {
+    id: "zombie",
+    name: "🧟 冷漠冰尸",
+    tagline: '"不是冷漠，是看透了。"',
+    dimensions: ["冷漠"],
+    description: "你的内心已经凉透了。像一具行走的冰尸，对大多数事情都提不起兴趣。爱也好恨也好，都太累了。你习惯性地保持距离，不深交、不依赖、不期待。你知道自己看起来很冷，但你觉得这样挺好的——至少不会再受伤了。",
+    traits: ["情感淡漠", "看破红尘", "社交节能模式", "无所谓"],
+    color: "#7f8c8d",
+    emoji: "🧟"
+  },
+  {
+    id: "doll",
+    name: "🎎 病娇人偶",
+    tagline: '"如果你只能是我一个人的就好了——我认真的。"',
+    dimensions: ["病娇", "偏执"],
+    description: "你的内心住着一个微笑着拿着刀的病娇人偶。你爱一个人的时候是燃烧式的、倾尽所有的、让人窒息的那种。你要绝对的忠诚和独佔欲。如果发现对方有一点异心，你的第一反应不是难过——是想把那个人锁起来，让他再也不能离开你。你的爱是华丽的牢笼。",
+    traits: ["佔有欲爆棚", "爱得极端", "容易想多", "用情太深"],
+    color: "#e91e63",
+    emoji: "🎎"
+  },
+  {
+    id: "shadow",
+    name: "🌑 偏执幽灵",
+    tagline: '"过去的事过不去，有些人忘不了，有些账总要算。"',
+    dimensions: ["偏执"],
+    description: "你的内心住着一个困在过去的幽灵。你很难释怀——一句伤人的话、一次背叛、一个不公平的对待，你会反复回想，反复咀嚼，反复地让那些负面情绪在心头翻涌。你记得每一个细节。你以为自己走出来了，但其实你只是学会了带着它们一起生活。",
+    traits: ["记性好得过分", "容易钻牛角尖", "猜疑心重", "无法释怀"],
+    color: "#34495e",
+    emoji: "🌑"
+  },
+  {
+    id: "empty",
+    name: "🕳️ 深渊空洞",
+    tagline: '"什么都没有，这才是最可怕的。"',
+    dimensions: ["冷漠", "偏执"],
+    description: "你不是冷漠，冷漠至少还有情绪可以压抑。你的内心是一个空洞——什么都没有。不爱不恨不想不期待。你可能会表现得很正常，和朋友笑、工作、吃饭，但只有你自己知道，那些都是演出来的。你内心深处的那个怪物，是虚无本身。",
+    traits: ["情感麻木", "感觉不到快乐", "演戏型人格", "虚无主义者"],
+    color: "#2d3436",
+    emoji: "🕳️"
+  },
+];
+
+// ==================== 隐藏人格 ====================
+const hiddenPersonalities = [
+  {
+    id: "dark_god",
+    name: "👁️ 邪神",
+    rarity: "legendary",
+    tagline: '"你不是内心有怪物——你就是怪物本身。"',
+    description: "恭喜你，或者该说——警报。你的内心居住的不是一种怪物，而是它们全部。腹黑的算计、暴怒的毁灭欲、贪婪的无底洞、嫉妒的毒液、傲慢的自恋、冷漠的冰封、病娇的偏执——你不是被某一个怪物寄宿。你是众怪之神。万魔殿在你心里开了个分公司。建议你保持情绪稳定，为了全人类的安全。",
+    traits: ["全暗面觉醒", "极度危险", "不可预测", "建议定期检查精神状态"],
+    color: "#000",
+    emoji: "👁️",
+    condition: (answers) => {
+      // 前8题选特定组合触发邪神
+      return answers[0] === 1 && answers[7] === 1 && answers[13] === 3;
+    }
+  },
+  {
+    id: "joker",
+    name: "🤡 小丑",
+    rarity: "superRare",
+    tagline: '"我笑不代表我开心，我只是习惯笑了。"',
+    description: "你看起来是所有人里最正常的那个——开朗、幽默、朋友多。但你知道吗？小丑的妆下面全是伤。你用搞笑来掩饰压抑，用社交来逃避独处。你笑得越大声，心里那个捏着嗓子尖叫的小丑就越累。你是个喜剧演员，但你的剧本是悲剧。",
+    traits: ["用笑容伪装", "社交达人但内心孤独", "搞笑是防御机制", "深夜emo型"],
+    color: "#6c5ce7",
+    emoji: "🤡",
+    condition: (answers) => {
+      return answers[3] === 0 && answers[9] === 1 && answers[13] === 0;
+    }
+  },
+];
+
+// ==================== 核心算法 ====================
+function calculatePersonality(answers) {
+  const scores = {};
+
+  answers.forEach((optIdx, qIdx) => {
+    const q = questions[qIdx];
+    const opt = q?.options[optIdx];
+    if (opt?.scores) {
+      Object.entries(opt.scores).forEach(([dim, val]) => {
+        scores[dim] = (scores[dim] || 0) + val;
+      });
+    }
+  });
+
+  // 隐藏人格判定
+  for (const hidden of hiddenPersonalities) {
+    if (hidden.condition(answers)) {
+      if (hidden.rarity === "legendary") { if (Math.random() > 0.5) continue; }
+      else if (hidden.rarity === "superRare") { if (Math.random() > 0.4) continue; }
+      return { personality: hidden, isHidden: true, scores, answers };
+    }
+  }
+
+  // 基础人格匹配
+  let bestMatch = personalities[0];
+  let bestScore = -Infinity;
+  for (const p of personalities) {
+    const total = p.dimensions.reduce((sum, dim) => sum + (scores[dim] || 0), 0);
+    if (total > bestScore) {
+      bestScore = total;
+      bestMatch = p;
+    }
+  }
+
+  return { personality: bestMatch, isHidden: false, scores, answers };
+}
+
+// ==================== UI ====================
+const app = document.getElementById('app');
+let answers = [];
+let current = 0;
+
+function renderHome() {
+  app.innerHTML = `
+    <div class="home-screen">
+      <div class="home-title">内心怪物</div>
+      <p class="home-subtitle">测测你心里住着什么怪物</p>
+      <div class="home-divider"></div>
+      <div class="home-card">
+        <p>14 道暗黑拷问，挖出你内心深处那只<span class="highlight">不敢见人</span>的怪物</p>
+        <p style="margin-top:12px;font-size:13px;color:rgba(255,255,255,0.3);">⚠️ 结果可能引起不适，玻璃心慎入</p>
+      </div>
+      <button class="btn-primary" onclick="startQuiz()">开始直面内心</button>
+      <div class="footer">仅供娱乐 · 不构成心理诊断</div>
+    </div>
+  `;
+}
+
+function getProgressText(idx) {
+  if (idx < 4) return '扒开你的伪装...';
+  if (idx < 9) return '逼近阴暗面...';
+  if (idx < 12) return '你的怪物在骚动...';
+  return '最后揭晓...';
+}
+
+function renderQuestion() {
+  const q = questions[current];
+  const progress = (current / questions.length) * 100;
+  app.innerHTML = `
+    <div>
+      <div class="quiz-header">
+        <span>${getProgressText(current)}</span>
+        <span class="num">${current + 1} / ${questions.length}</span>
+      </div>
+      <div class="progress-wrap"><div class="progress-bar" style="width:${progress}%"></div></div>
+      <span class="question-tag">第 ${current + 1} 问</span>
+      <h2 class="question-title">${q.title}</h2>
+      <div class="option-list">
+        ${q.options.map((opt, idx) => `
+          <button class="option-btn" onclick="selectOption(${idx})">
+            <span class="option-label">${opt.label}</span>
+            <span>${opt.text}</span>
+          </button>
+        `).join('')}
+      </div>
+      <div class="footer">所有数据仅本地运算，不收集隐私</div>
+    </div>
+  `;
+}
+
+function selectOption(idx) {
+  answers.push(idx);
+  if (current < questions.length - 1) {
+    current++;
+    renderQuestion();
+  } else {
+    const result = calculatePersonality(answers);
+    renderResult(result);
+  }
+}
+
+function renderResult({ personality, isHidden, scores }) {
+  const rarityMap = {
+    rare: { text: '◆ 稀 有 ◆', bg: 'rgba(100,100,255,0.1)', color: '#6c5ce7' },
+    superRare: { text: '◆ 超 稀 有 ◆', bg: 'rgba(108,92,231,0.12)', color: '#a29bfe' },
+    legendary: { text: '◆ 传 说 级 ◆', bg: 'rgba(212,175,55,0.1)', color: '#d4af37', border: '#d4af37' },
+  };
+  const rarity = isHidden ? rarityMap[personality.rarity] : null;
+
+  // 收集高分维度作为标签
+  const topTraits = Object.entries(scores)
+    .sort(([,a], [,b]) => b - a)
+    .slice(0, 4)
+    .filter(([,v]) => v > 0)
+    .map(([k]) => k);
+
+  const rarityHtml = rarity
+    ? `<div class="result-rarity" style="background:${rarity.bg};color:${rarity.color};border:1px solid ${rarity.color}30">${rarity.text}</div>`
+    : '';
+
+  app.innerHTML = `
+    <div class="result-screen">
+      <div style="padding:20px 0 10px">
+        <div style="font-size:12px;color:var(--dim);letter-spacing:4px;margin-bottom:8px;">— 揭 晓 —</div>
+        ${rarityHtml}
+      </div>
+      <div class="result-monster" style="background:radial-gradient(circle, ${personality.color}15, transparent 70%)">
+        ${personality.emoji}
+      </div>
+      <div class="result-name" style="color:${personality.color}">${personality.name.replace(/^.{1,2}\s/, '')}</div>
+      <div class="result-divider"></div>
+
+      <div class="result-card">
+        <div class="result-desc">${personality.description}</div>
+        <div class="result-tagline">${personality.tagline}</div>
+        ${personality.traits ? `
+        <div class="result-traits">
+          ${personality.traits.map(t => `<span class="trait-tag">${t}</span>`).join('')}
+        </div>` : ''}
+      </div>
+
+      <button class="btn-primary" onclick="shareResult()" style="margin-top:12px;">📸 截图发朋友圈</button>
+      <button class="btn-restart" onclick="startQuiz()">再测一次（看看你还能多黑暗）</button>
+      <div class="footer">仅供娱乐 · 不构成心理诊断<br>如果你发现你的怪物过于真实，建议找个人聊聊</div>
+    </div>
+  `;
+}
+
+function shareResult() {
+  // 引导截图
+  app.innerHTML = app.innerHTML.replace(
+    '<button class="btn-primary" onclick="shareResult()" style="margin-top:12px;">📸 截图发朋友圈</button>',
+    '<div style="padding:12px;background:var(--card);border-radius:12px;font-size:13px;color:var(--dim);margin-top:12px;animation:flicker 1s infinite;">📱 截图保存，分享到朋友圈或微信群</div>'
+  );
+}
+
+function startQuiz() {
+  answers = [];
+  current = 0;
+  renderQuestion();
+}
+
+// 启动
+renderHome();
+</script>
+</body>
+</html>
