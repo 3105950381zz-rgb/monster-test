@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>你的内心住着什么怪物</title>
   <style>
     :root {
@@ -647,7 +650,7 @@ function renderResult({ personality, isHidden, scores }) {
       <!-- 二维码弹窗 -->
       <div class="modal-overlay" id="qrModal" onclick="hideQR(event)">
         <div class="modal-box">
-          <img src="qrcode.jpg"/>
+          <img src="qrcode.jpg?v=1"/>
           <div class="tip">扫码联系灵客星球</div>
           <div class="subtip">想做测试·小程序·AI产品 欢迎聊聊</div>
           <button class="modal-close" onclick="hideQR()">关闭</button>
